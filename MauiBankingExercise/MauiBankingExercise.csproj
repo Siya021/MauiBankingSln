@@ -60,6 +60,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="ViewModelsl\**" />
+	  <Compile Remove="ViewModelsl\**" />
+	  <EmbeddedResource Remove="ViewModelsl\**" />
+	  <MauiCss Remove="ViewModelsl\**" />
+	  <MauiXaml Remove="ViewModelsl\**" />
+	  <None Remove="ViewModelsl\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 			<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
@@ -67,8 +76,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Views\" />
-	  <Folder Include="ViewModelsl\" />
+	  <MauiXaml Update="Views\CustomerDashboard.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CustomerSelectionView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 </Project>
