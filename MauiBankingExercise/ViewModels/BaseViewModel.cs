@@ -19,7 +19,7 @@ namespace MauiBankingExercise.ViewModels
 
         public virtual void OnAppearing()
         {
-            // This method can be overridden in derived classes to handle when the view appears
+
         }
 
     }
