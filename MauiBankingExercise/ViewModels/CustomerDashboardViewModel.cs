@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MauiBankingExercise.ViewModels
 {
-    public class CustomerDashboardViewModel
+    public class CustomerDashboardViewModel : BaseViewModel
     {
 
 
