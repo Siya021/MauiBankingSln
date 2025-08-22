@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.VoiceCommands;
 
 namespace MauiBankingExercise.Services
 {
@@ -16,6 +15,10 @@ namespace MauiBankingExercise.Services
         public BankingDatabaseService(SQLiteConnection db)
         {
             _db = db;
+        }
+
+        public BankingDatabaseService()
+        {
         }
 
         public List<Customer> GetAllCustomers()
@@ -77,5 +80,16 @@ namespace MauiBankingExercise.Services
 
             return transactionType.TransactionTypeId;
 
-        }
-    } 
+        }
+
+        internal TransactionType GetTransactionTypeId(int transactionTypeId)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal IEnumerable<object> GetCustomerAccounts(int customerId)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

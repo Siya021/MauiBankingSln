@@ -4,75 +4,137 @@ using MauiBankingExercise.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.UI.WebUI;
+using System.Windows.Input;
 
 namespace MauiBankingExercise.ViewModels
 {
-
     public partial class CustomerDashboardViewModel : BaseViewModel
     {
-
         private readonly BankingDatabaseService _db;
+        private Customer _customer = null!;
+        private Account _selectedAccount = null!;
+        private string _selectedTransactionType = string.Empty;
+        private decimal _transactionAmount;
+        private bool _isTransactionButtonEnabled;
+        private int _customerId;
 
-        // Replacing [ObservableProperty] with standard property implementation
-        private ObservableCollection<Account> accounts;
-        public ObservableCollection<Account> Accounts
+        public ObservableCollection<Account> Accounts { get; set; } = new ObservableCollection<Account>();
+        public ObservableCollection<Transaction> CurrentTransaction { get; set; } = new ObservableCollection<Transaction>();
+        public ObservableCollection<string> TransactionTypes { get; } = new ObservableCollection<string>
         {
-            get => accounts;
-            set => SetProperty(ref accounts, value);
+            "Deposit",
+            "Withdrawal"
+        };
+
+        public ICommand SubmitTransactionCommand { get; }
+        public ICommand ViewTransactionsCommand { get; }
+
+        public int CustomerId
+        {
+            get => _customerId;
+            set
+            {
+                _customerId = value;
+                OnPropertyChanged(nameof(CustomerId));
+            }
         }
 
-        private Account selectedAccount;
+        public Customer Customer
+        {
+            get => _customer;
+            set
+            {
+                _customer = value;
+                OnPropertyChanged(nameof(Customer));
+            }
+        }
+
+        public string CustomerFullName => Customer == null ? "Customer Not Found" : $"{Customer.FirstName} {Customer.LastName}";
+
         public Account SelectedAccount
         {
-            get => selectedAccount;
-            set => SetProperty(ref selectedAccount, value);
+            get => _selectedAccount;
+            set
+            {
+                _selectedAccount = value;
+                OnPropertyChanged(nameof(SelectedAccount));
+                LoadTransactions();
+            }
         }
 
-        private decimal transactionAmount;
-        public decimal TransactionAmount
-        {
-            get => transactionAmount;
-            set => SetProperty(ref transactionAmount, value);
-        }
-
-        private string selectedTransactionType;
         public string SelectedTransactionType
         {
-            get => selectedTransactionType;
-            set => SetProperty(ref selectedTransactionType, value);
+            get => _selectedTransactionType;
+            set
+            {
+                _selectedTransactionType = value;
+                OnPropertyChanged(nameof(SelectedTransactionType));
+                IsTransactionButtonEnabled = !string.IsNullOrEmpty(_selectedTransactionType) && _transactionAmount > 0;
+            }
         }
 
-        public ObservableCollection<string> TransactionTypes { get; } = new ObservableCollection<string>
+        public decimal TransactionAmount
+        {
+            get => _transactionAmount;
+            set
             {
-                "Deposit",
-                "Withdrawal"
-            };
+                _transactionAmount = value;
+                OnPropertyChanged(nameof(TransactionAmount));
+                IsTransactionButtonEnabled = !string.IsNullOrEmpty(_selectedTransactionType) && _transactionAmount > 0;
+            }
+        }
 
-        public CustomerDashboardViewModel(BankingDatabaseService db, int customerId, ObservableCollection<Account> accounts)
+        public bool IsTransactionButtonEnabled
+        {
+            get => _isTransactionButtonEnabled;
+            set
+            {
+                _isTransactionButtonEnabled = value;
+                OnPropertyChanged(nameof(IsTransactionButtonEnabled));
+            }
+        }
+
+        public CustomerDashboardViewModel(BankingDatabaseService db)
         {
             _db = db;
-            Accounts = new ObservableCollection<Account>(_db.GetAccountsByCustomerId(customerId));
+            Accounts = new ObservableCollection<Account>();
+            SubmitTransactionCommand = new RelayCommand(SubmitTransaction, CanSubmitTransaction);
+            ViewTransactionsCommand = new RelayCommand(LoadTransactions);
         }
 
-        [RelayCommand]
-        void MakeTransaction()
+        public CustomerDashboardViewModel()
         {
-            if (selectedAccount == null || string.IsNullOrEmpty(selectedTransactionType)) return;
-
-            var transactionTypeId = _db.GetTransactionTypeId(selectedTransactionType);
-
-            try
-            {
-                _db.AddTransaction(0, transactionTypeId, selectedAccount.AccountId, DateTime.Now, TransactionAmount, "Transaction made from dashboard", null);
+            _db = null!;
+            Accounts = new ObservableCollection<Account>();
+            SubmitTransactionCommand = null!;
+            ViewTransactionsCommand = null!;
             }
-            catch (InvalidOperationException ex)
+
+        private void LoadTransactions()
+        {
+            if (SelectedAccount != null)
             {
-                // Handle insufficient funds or other exceptions
-                Console.WriteLine(ex.Message);// Assuming 1 for Deposit and 2 for Withdrawal
+                CurrentTransaction.Clear();
+                var transactions = _db.GetTransactionsByAccountId(SelectedAccount.AccountId);
+                foreach (var tx in transactions)
+                {
+                    CurrentTransaction.Add(tx);
+                }
             }
+        }
+
+        private void SubmitTransaction()
+        {
+        }
+
+        private bool CanSubmitTransaction()
+        {
+            return SelectedAccount != null && !string.IsNullOrEmpty(SelectedTransactionType) && TransactionAmount > 0;
         }
     }
+}

@@ -4,18 +4,17 @@ namespace MauiBankingExercise.Views;
 
 public partial class CustomerDashboard : ContentPage
 {
-	public CustomerDashboard(CustomerDashboardViewModel vm)
-	{
-		InitializeComponent();
+    private readonly CustomerDashboardViewModel vm;
 
-		BindingContext = vm;
-	}
+    public CustomerDashboard()
+    {
+        InitializeComponent();
+        vm = new CustomerDashboardViewModel();
+        BindingContext = vm;
+    }
 
     protected override void OnAppearing()
     {
-        
-		base.OnAppearing();
-
-		((CustomerDashboardViewModel)BindingContext).OnAppearing();
+        base.OnAppearing();
     }
 }
